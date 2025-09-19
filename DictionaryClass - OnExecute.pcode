@@ -1,0 +1,173 @@
+/* Dictionary Class to store and retrieve Any type of Values, which can be used as a Utility */
+class DictionaryClass
+   /* Constructor Method */
+   method DictionaryClass();
+   
+   /* Update Dictionary Methods */
+   method insertItem(&aValue As any);
+   method removeItem(&aValue As any) Returns boolean;
+   method insertItemAt(&nPos As integer, &aValue As any) Returns boolean;
+   method removeItemAt(&nPos As integer) Returns boolean;
+   
+   /* Fetch Methods */
+   method getItemValue(&nPos As integer) Returns any;
+   method getItemPosition(&anyValue As any, &nStartPos As integer) Returns integer;
+   
+   /* Utility Method */
+   method refreshDictionary() Returns boolean;
+   method joinDictionary() Returns string;
+
+method 
+   
+protected
+   property array of any anyDictionary;
+end-class;
+
+/* Constructor Implementation - All Initializations should happen here */
+method DictionaryClass
+   Local any &Temp;
+   %This.anyDictionary = CreateArrayAny(&Temp);
+   
+end-method;
+
+/* Join the values to review the current items as String */
+method joinDictionary
+   /+ Returns String +/
+   Return %This.anyDictionary.Join();
+end-method;
+
+/* Refresh Dictionary to have only valid values and remove blank values */
+method refreshDictionary
+   /+ Returns Boolean +/
+   Local integer &nSize;
+   Local any &anyTemp;
+   Local array of any &arTemp;
+   
+   try
+      &arTemp = CreateArrayAny(&anyTemp);
+      
+      For &nSize = 1 To %This.anyDictionary.Len
+         If &anyTemp <> %This.anyDictionary [&nSize] Then
+            &arTemp.Push(%This.anyDictionary [&nSize]);
+         End-If;
+      End-For;
+      
+      %This.anyDictionary = &arTemp.Clone();
+      Return True;
+   catch Exception &e
+      MessageBox(0, "", 0, 0, "" | &e.ToString());
+      Return False;
+   end-try;
+   
+   Return False;
+end-method;
+
+/* Method to find the position of the Value that you are searching for */
+method getItemPosition
+   /+ &anyValue as Any, +/
+   /+ &nStartPos as Integer +/
+   /+ Returns Integer +/
+   Local integer &nSize;
+   
+   If &nStartPos > %This.anyDictionary.Len Then
+      Return 0;
+   End-If;
+   
+   If &nStartPos > 0 Then
+      For &nSize = &nStartPos To %This.anyDictionary.Len - 1
+         If &anyValue = %This.anyDictionary [&nSize] Then
+            Return &nSize;
+         End-If;
+      End-For;
+   Else
+      For &nSize = 0 To %This.anyDictionary.Len - 1
+         If &anyValue = %This.anyDictionary [&nSize] Then
+            Return &nSize;
+         End-If;
+      End-For;
+   End-If;
+   
+   Return 0;
+end-method;
+
+/* Get the value of the item by the Position */
+method getItemValue
+   /+ &nPos as Integer +/
+   /+ Returns Any +/
+   If &nPos > %This.anyDictionary.Len Then
+      Return Null
+   Else
+      Return %This.anyDictionary [&nPos];
+   End-If;
+   
+   Return Null;
+end-method;
+
+/* Deletes the Item from the position and then refreshes the Dictionary */
+method removeItemAt
+   /+ &nPos as Integer +/
+   /+ Returns Boolean +/
+   Local any &anyTemp;
+   
+   If &nPos > %This.anyDictionary.Len - 1 Then
+      Return False;
+   Else
+      %This.anyDictionary [&nPos] = &anyTemp;
+      
+      Return %This.refreshDictionary();
+   End-If;
+   
+   Return False;
+end-method;
+
+/* Inserts the Item at specific position - useful when you have orbitary sorting instead of Binary Sort */
+method insertItemAt
+   /+ &nPos as Integer, +/
+   /+ &aValue as Any +/
+   /+ Returns Boolean +/
+   Local integer &nCount;
+   Local any &anyTemp;
+   
+   %This.anyDictionary.Push(&anyTemp);
+   
+   If &nPos > %This.anyDictionary.Len - 1 Then
+      Return False;
+   Else
+      For &nCount = %This.anyDictionary.Len To &nPos - 1 Step - 1
+         %This.anyDictionary [&nCount] = %This.anyDictionary [&nCount - 1];
+      End-For;
+      
+      %This.anyDictionary [&nPos] = &aValue;
+      Return True;
+   End-If;
+   
+   Return False;
+end-method;
+
+/* Removes the first occurance of the value specified from the Dictionary */
+method removeItem
+   /+ &aValue as Any +/
+   /+ Returns Boolean +/
+   Local any &anyTemp;
+   
+   Local number &nFoundAt;
+   &nFoundAt = %This.anyDictionary.Find(&aValue);
+   If &nFoundAt < 1 Then
+      Return False;
+   Else
+      %This.anyDictionary [&nFoundAt] = &anyTemp;
+   End-If;
+   
+   Return %This.refreshDictionary();
+end-method;
+
+/* Simply push the item value at the end of the Dictionary */
+method insertItem
+   /+ &aValue as Any +/
+   If %This.anyDictionary.Len = 1 And
+         %This.anyDictionary [1] = "" Then
+      %This.anyDictionary [1] = &aValue; /* Incase if this the first item */
+   Else
+      %This.anyDictionary.Push(&aValue);
+   End-If;
+end-method;
