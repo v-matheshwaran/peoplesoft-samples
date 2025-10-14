@@ -1,0 +1,353 @@
+import PTFP_FEED:*;
+import PTFP_FEED:DataSource:*;
+import PTFP_FEED:UTILITY:*;
+import PTFP_FEED:XML_FEED:*;
+import PTFP_FEED:EXCEPTION:*;
+
+class AppChangesDS extends PTFP_FEED:DataSource:DataSource
+   /* --- Properties --- */
+   property PTFP_FEED:DataSource:DataSourceSetting AppModuleName readonly;
+   
+   /* Required Methods */
+   method AppChangesDS(&id_param As string, &pParent As PTFP_FEED:Feed);
+   method clone() Returns PTFP_FEED:DataSource:DataSource; /* Clone the object */
+   method getContentUrl() Returns string; /* Get the feed content url */
+   rem method getDataSecurity() Returns PTFP_FEED:UTILITY:Collection; /* Get the feed data security */
+   method isCurrentUserAuthorized() Returns boolean; /* Current user has view permission? */
+   method initializeSettings(&pNewSettings As PTFP_FEED:UTILITY:Collection); /* Initialize Settings */
+   method processSettingsChange(); /* Process setting value changess */
+   method execute(&pFeedDoc As PTFP_FEED:XML_FEED:FeedDoc); /* Execute the Data Source object, and fill in the Feed Document */
+   
+   /* Recommendend Methods */
+   method isCurrentUserAdmin() Returns boolean; /* Current user has admin role? */
+   
+end-class;
+
+method AppChangesDS
+   /+ &id_param as String, +/
+   /+ &pParent as PTFP_FEED:Feed +/
+   Local PTFP_FEED:UTILITY:Utility &utility;
+   
+   /* Create the super */
+   %Super = create PTFP_FEED:DataSource:DataSource(&id_param, &pParent);
+   
+   /* Set the read only properties in %super */
+   %This.setDataSourceType("AppChangesDS");
+   %This.setHasSettings( True);
+   %This.setHasParameters( True);
+   %This.setAllowCustomParameters( False);
+   %This.setAllowRealTimeFeedSecurity( True);
+   %This.setPortalSpecificPersonalization( False);
+   
+   /* Now, initialize the setting */
+   %This.initializeSettings( Null);
+end-method;
+
+method initializeSettings
+   /+ &pNewSettings as PTFP_FEED:UTILITY:Collection +/
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.initializeSettings +/
+   
+   Local string &dssId, &dssValue;
+   Local boolean &dssCompleted;
+   
+   Local PTFP_FEED:DataSource:DataSourceSetting &thisDSS;
+   Local PTFP_FEED:UTILITY:Collection &thisList;
+   Local PTFP_FEED:UTILITY:Utility &utility = %This.Utility;
+   
+   Local ApiObject &qry;
+   
+   /* Reset the Settings collection */
+   &thisList = %This.resetSettings();
+   
+   /* Assume the settings are complete, if the &pNewSettings is not null */
+   &dssCompleted = (&pNewSettings <> Null);
+   
+   
+   /************************/
+   /* DSS 1 - AppModule Name */
+   /************************/
+   &AppModuleName = %This.addSetting("APPMODULENAME", "");
+   
+   /* Check the value passed in */
+   If &pNewSettings <> Null Then
+      &thisDSS = &pNewSettings.getById(%This.AppModuleName.ID);
+      If &thisDSS = Null Then
+         &dssCompleted = False;
+      Else
+         %This.AppModuleName.Value = &thisDSS.Value;
+      End-If;
+   End-If;
+   
+   /* Set the other properties */
+   %This.AppModuleName.Name = %This.AppModuleName.ID;
+   %This.AppModuleName.LongName = "Application Module Name";
+   %This.AppModuleName.FieldType = &utility.FIELDTYPE_CHARACTER;
+   %This.AppModuleName.DefaultValue = "Default Value of the Property";
+   %This.AppModuleName.RelatedFieldValue = "";
+   %This.AppModuleName.EditType = &utility.EDITTYPE_PROMPTTABLE;
+   %This.AppModuleName.PromptTable = Record.BD_APPMODULE_VW; /* Should only use SQL Table or View */
+   %This.AppModuleName.Range = Null; /* Only set the range if the edit type is translatable */
+   %This.AppModuleName.Required = True;
+   %This.AppModuleName.Enabled = True;
+   %This.AppModuleName.Visible = True; /* Whether to show the field, when it's enabled */
+   %This.AppModuleName.DisplayOnly = False; /* Whether to show the field as Display Only */
+   %This.AppModuleName.ShowRelatedField = True; /* Whether to show the related value, if it's not empty */
+   %This.AppModuleName.RefreshOnChange = True; /* Whether to call the processSettingsChange() on value change */
+   
+   /* check if user has view permission */
+   /*&qry = %Session.getquery();
+   Local string &qryname = %This.QueryName.Value;
+   If All(&qryname) Then
+      If &qry.open(&qryname, False, False) = 0 Then
+         &hasViewPermission_inst = True;
+      Else
+         &hasViewPermission_inst = False;
+      End-If;
+   Else
+      &hasViewPermission_inst = False;
+   End-If;*/
+   REM &hasViewPermission_inst = True;
+   
+   /* Make the Settings collection unchangeable */
+   &thisList.setImmutable();
+   
+   /*********************************/
+   /* Set the SettingCompleted flag */
+   /*********************************/
+   %This.setSettingsCompleted(&dssCompleted);
+   
+end-method;
+
+method clone
+   /+ Returns PTFP_FEED:DataSource:DataSource +/
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.clone +/
+   
+   Local PTFP_FEED:DataSource:DataSource &newDS = create PTFP_FEED:DataSource:FeedDataSource(%This.ID, %This.Parent);
+   
+   /* Call the copy properties function */
+   %This.copyProperties(&newDS);
+   
+   Return &newDS;
+end-method;
+
+method getContentUrl
+   /+ Returns String +/
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.getContentUrl +/
+   Return "https://github.com/v-matheshwaran/better-designs";
+   /* TODO: Update the workign URL */
+end-method;
+
+method isCurrentUserAdmin
+   /+ Returns Boolean +/
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.isCurrentUserAdmin +/
+   
+   Local boolean &isCurrentUserAdmin;
+   
+   /* Call %Super to check first */
+   &isCurrentUserAdmin = %Super.isCurrentUserAdmin();
+   
+   If Not (&isCurrentUserAdmin) Then
+      If IsUserInRole("Better Designs Administrator") Then
+         &isCurrentUserAdmin = True;
+      End-If;
+   End-If;
+   
+   Return &isCurrentUserAdmin;
+   
+end-method;
+
+method execute
+   /+ &pFeedDoc as PTFP_FEED:XML_FEED:FeedDoc +/
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.execute +/
+   Local array of object &arr = %This.Parent.FeedAttributes.getCollectionAsArray();
+   If &arr.Len = 0 Then
+      throw create PTFP_FEED:EXCEPTION:PropertyNotSetException(MsgGetText(139, 528, "(Message Not Found) Required mapping element is not found"));
+   End-If;
+   
+   Local PTFP_FEED:UTILITY:Utility &utility = %This.Utility;
+   /*   If &pFeedDoc.FeedFormat = &utility.FEEDFORMAT_ATOM10 Then
+      %This.updateAtomFeed(&pFeedDoc);
+   Else
+      %This.updateOtherFeed(&pFeedDoc);
+   End-If;*/
+   
+   Local ptfp_feed:Feed &thisFeed;
+   Local integer &maxRow, &i;
+   Local string &headerTpl, &entryTpl, &footerTpl, &feedDocString, &temp, &title;
+   Local PTFP_FEED:FeedFactory &feedFactory;
+   Local PTFP_FEED:DataSource:DataSourceParameter &thisDSP;
+   Local ApiObject &query;
+   Local Field &pFld;
+   Local Record &prompts;
+   Local boolean &oneentryperrow;
+   
+   /* If the &pFeedDoc is null, stop right away */
+   If (&pFeedDoc = Null) Then
+      Return;
+   End-If;
+   
+   /* If the Settings properties is null, stop right away */
+   If (%This.AppModuleName = Null) Or
+         (%This.AppModuleName.Value = "") Then
+      throw create PTFP_FEED:EXCEPTION:PropertyNotSetException(MsgGetText(219, 3001, "(Message Not Found) Data Type"));
+   End-If;
+   
+   /* Set the Max Row Parameter in Feed Doc */
+   &pFeedDoc.MaxEntries = &maxRow;
+   
+   /* Get the Feed Factory */
+   If %This.Parent = Null Then
+      &feedFactory = create PTFP_FEED:FeedFactory();
+   Else
+      &feedFactory = %This.Parent.FeedFactory;
+   End-If;
+   Local datetime &dttm = %Datetime;
+   REM    Local string &id = %This.AppModuleName.ID | "_" | DateTimeToLocalizedString(&dttm, "ddMMMyyyymmhhss");
+   Local string &id = %This.AppModuleName.ID;
+   
+   Local PTFP_FEED:XML_FEED:FeedEntry &thisEntry = &pFeedDoc.addEntry(&id);
+   
+   If (&thisEntry <> Null) Then
+      
+      /* Fill in entry properties */
+      &thisEntry.Title = %This.AppModuleName.ID | "_UpdateOn_" | DateTimeToLocalizedString(&dttm, "ddMMMyyyymmhhss");
+      
+      &thisEntry.ContentUrl = %This.getContentUrl();
+      &thisEntry.Published = &dttm;
+      &thisEntry.Updated = %Datetime;
+      
+      &thisEntry.GUID = "Unique-" | DateTimeToLocalizedString(&dttm, "ddMMMyyyymmhhss-iiiii");
+      Local array of string &arAuthor;
+      &arAuthor = CreateArray("");
+      &arAuthor.Push("Matheshwaran V as Author");
+      &thisEntry.Author = &arAuthor;
+      
+      &thisEntry.Description = "<b>Sample Description of the Entry which can be changed at Execute function of BD_APP_PKG_ROOT:FEEDS:AppChangesDS Class</b>";
+      
+      /* Add Categories */
+      Local boolean &succeeded = &thisEntry.addCategory("Generic Category");
+      /* Priority */
+      &succeeded = &thisEntry.addCategory(MsgGetText(35, 114, "Medium Priority"));
+      /* Status */
+      &succeeded = &thisEntry.addCategory(MsgGetText(35, 117, "Status - Selected"));
+      
+   End-If;
+   
+end-method;
+
+method isCurrentUserAuthorized
+   /+ Returns Boolean +/
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.isCurrentUserAuthorized +/
+   
+   Return True;
+end-method;
+
+method processSettingsChange
+   /+ Extends/implements PTFP_FEED:DataSource:DataSource.processSettingsChange +/
+   
+   Local boolean &dssCompleted;
+   Local string &thisValue;
+   Local Rowset &rs;
+   
+   Local PTFP_FEED:DataSource:DataSourceParameter &thisDSP;
+   Local PTFP_FEED:UTILITY:Collection &thisList;
+   Local PTFP_FEED:UTILITY:Utility &utility = %This.Utility;
+   
+   Local ApiObject &thisQry;
+   Local ApiObject &prompts;
+   Local ApiObject &promptFld;
+   Local integer &i, &j;
+   
+   /* Set the flag first */
+   %This.setSettingsCompleted( False);
+   &dssCompleted = True;
+   
+   /* Reset the Parameters List */
+   &thisList = %This.resetParameters();
+   
+   /* If the Settings properties is null, stop right away */
+   If %This.AppModuleName = Null Then
+      Return;
+   End-If;
+   
+   
+   /******************************/
+   /* Check DSS 1 - Product/Module Name */
+   /******************************/
+   &thisValue = %This.AppModuleName.Value;
+   If None(&thisValue) Then
+      &dssCompleted = False;
+   Else
+      &rs = CreateRowset(Record.BD_APPMODULE_VW);
+      &rs.Fill("WHERE (OBJECTOWNERID=:1)", &thisValue);
+      
+      If &rs(1) = Null Or
+            None(&rs(1).BD_APPMODULE_VW.OBJECTOWNERID.Value) Then
+         throw create PTFP_FEED:EXCEPTION:NotFoundException(MsgGetText(139, 521, "(Message Not Found) Product/Module not found"), &thisValue);
+      End-If;
+      
+      %This.AppModuleName.RelatedFieldValue = &rs.GetRow(1).BD_APPMODULE_VW.DESCRIPTION.Value;
+   End-If;
+   
+   
+   /***********************/
+   /* Load the Parameters */
+   /***********************/
+   If &dssCompleted Then
+      /* MAX ROW parameter */
+      &thisDSP = %This.addParameter(&utility.DSPARAMETER_MAXROW, String(&utility.SF_MAXROWOPTION_LATESTMSG));
+      &thisDSP.Name = &thisDSP.ID;
+      &thisDSP.Description = MsgGetText(219, 3005, "Message Not Found - Max Entries");
+      &thisDSP.FieldType = &utility.FIELDTYPE_NUMBER;
+      &thisDSP.DefaultValue = String(&utility.SF_MAXROWOPTION_LATESTMSG);
+      &thisDSP.Value = &thisDSP.DefaultValue;
+      &thisDSP.Required = True;
+      
+      &thisDSP = %This.addParameter("FEED.PROCINST", "");
+      &thisDSP.Name = &thisDSP.ID;
+      &thisDSP.Description = "";
+      &thisDSP.FieldType = &utility.FIELDTYPE_NUMBER;
+      &thisDSP.DefaultValue = "";
+      &thisDSP.Value = "";
+      &thisDSP.Required = False;
+      
+      &thisDSP = %This.addParameter("FEED.MAXROWS", "0");
+      &thisDSP.Name = &thisDSP.ID;
+      &thisDSP.Description = "";
+      &thisDSP.FieldType = &utility.FIELDTYPE_NUMBER;
+      &thisDSP.DefaultValue = "0";
+      &thisDSP.Value = "0";
+      &thisDSP.Required = True;
+      
+      &thisDSP = %This.addParameter("FEED.SECTYPE", "");
+      &thisDSP.Name = &thisDSP.ID;
+      &thisDSP.Description = "";
+      &thisDSP.FieldType = &utility.FIELDTYPE_CHARACTER;
+      &thisDSP.DefaultValue = "Q";
+      &thisDSP.Value = "Q";
+      &thisDSP.Required = True;
+      
+      &thisDSP = %This.addParameter("FEED.LANGUAGE", "");
+      &thisDSP.Name = &thisDSP.ID;
+      &thisDSP.Description = "";
+      &thisDSP.FieldType = &utility.FIELDTYPE_CHARACTER;
+      &thisDSP.DefaultValue = "ALL";
+      &thisDSP.Value = "";
+      &thisDSP.Required = True;
+      
+      &thisDSP = %This.addParameter("FEED.ONERWPERETRY", "");
+      &thisDSP.Name = &thisDSP.ID;
+      &thisDSP.Description = "";
+      &thisDSP.FieldType = &utility.FIELDTYPE_CHARACTER;
+      &thisDSP.DefaultValue = "Y";
+      &thisDSP.Value = "Y";
+      &thisDSP.Required = True;
+   End-If;
+   
+   
+   /*********************************/
+   /* Set the SettingCompleted flag */
+   /*********************************/
+   %This.setSettingsCompleted(&dssCompleted);
+end-method;
+
