@@ -1,0 +1,55 @@
+import PTNUI:Dynamic:DynamicLoader;
+import PTNUI:Model:LandingPageTab;
+import PTNUI:Model:LandingPageSection;
+import PTNUI:Model:Tile;
+import PTNUI:Dynamic:DynamicContent;
+
+class DynamicTileLoader extends PTNUI:Dynamic:DynamicLoader
+   /*&oTile = %This.CreateTileUsingTab("", "MY_SECTION");
+   &oTile.RowNum = %This.GetNextRowNumber();
+   &oTile.GltImageName = Image.MY_IMAGE;
+   %This.SetupFluidTarget(&oTile, GenerateComponentContentURL(%This.Tab.PortalName, %This.Tab.NodeName, MenuName.MY_MENU, %Market, Component.MY_COMPONENT, Page.MY_PAGE1, %Action_UpdateDisplay));
+   %This.AddTileToSection(&oTile);*/
+   method DynamicTileLoader(&oTab As PTNUI:Model:LandingPageTab, &oSect As PTNUI:Model:LandingPageSection);
+   method LoadSection();
+end-class;
+
+method DynamicTileLoader
+   /+ &oTab as PTNUI:Model:LandingPageTab, +/
+   /+ &oSect as PTNUI:Model:LandingPageSection +/
+   %Super = create PTNUI:Dynamic:DynamicLoader(&oTab, &oSect);
+   
+end-method;
+
+method LoadSection
+   /+ Extends/implements PTNUI:Dynamic:DynamicLoader.LoadSection +/
+   
+   Local PTNUI:Model:Tile &oTile;
+   Local PTNUI:Dynamic:DynamicContent &dynCont;
+   
+   Local string &sURL, &sTileDescription;
+   Local number &n = Mod(Rand() * 10, 10);
+   If &n < 5 Then
+      &sURL = GenerateComponentPortalURL(%Portal, %Node, MenuName.HRCD_EMPLOYEE_FL, "GBL", Component.HRCD_CO_DIRECT_FL, Page.HRCD_CO_DIRECT_FL, "U");
+      &sTileDescription = "Dyn. Company Directory";
+   Else
+      &sURL = GenerateComponentPortalURL(%Portal, %Node, MenuName.MAINTAIN_SECURITY, "GBL", Component.CHANGE_PASSWORD, "", "U");
+      &sTileDescription = "Dyn. Password Reset";
+   End-If;
+   
+   &oTile = %This.CreateTileUsingTab("", &sTileDescription);
+   If &n < 5 Then
+      &oTile.GltImageName = Image.PS_ORG_DIRECTORY_L_FL;
+   Else
+      &oTile.GltImageName = Image.PTIAAU_RESET_ICON_FL;
+   End-If;
+   
+   &oTile.RowNum = %Super.GetNextRowNumber();
+   &oTile.IsSmallFFOptimized = 1;
+   rem &oTile.StyleClasses = "psa_footer-copy";
+   %This.SetBehaviorRequired(&oTile);
+   %This.SetupClassicTarget(&oTile, &sURL);
+   &oTile.UseAltText = True;
+   %This.AddTileToSection(&oTile);
+end-method;
+
