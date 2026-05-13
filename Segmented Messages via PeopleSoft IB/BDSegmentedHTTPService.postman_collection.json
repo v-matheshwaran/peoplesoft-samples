@@ -1,0 +1,319 @@
+{
+  "info": {
+    "_postman_id": "1d9ba7c8-e565-4569-921d-126448b13d81",
+    "name": "BDSegmentedHTTPService",
+    "description": "Segmented HTTP Service\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29894506"
+  },
+  "item": [
+    {
+      "name": "Segmentation SO with HTTP",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "OperationName",
+            "value": "BD_SEG_HTTP_ASYNC_SO.v1",
+            "type": "text"
+          },
+          {
+            "key": "From",
+            "value": "ANONYMOUS",
+            "type": "text"
+          },
+          {
+            "key": "To",
+            "value": "PSFT_HR",
+            "type": "text"
+          },
+          {
+            "key": "DataChunkCount",
+            "value": "2",
+            "type": "text"
+          },
+          {
+            "key": "DataChunk",
+            "value": "1",
+            "type": "text"
+          },
+          {
+            "key": "OperationType",
+            "value": "async",
+            "type": "text"
+          },
+          {
+            "key": "TransactionID",
+            "value": "3b4329b0-4ee8-11f1-9923-c3d4a49a7721",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"segments\": [\r\n    {\r\n      \"segmentId\": 1,\r\n      \"content\": \"Part 1\"\r\n    }\r\n  ]\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BD_SEGMENTED_HTTP_SRV_PortBaseUrl}}/PSIGW/HttpListeningConnector",
+          "host": [
+            "{{BD_SEGMENTED_HTTP_SRV_PortBaseUrl}}"
+          ],
+          "path": [
+            "PSIGW",
+            "HttpListeningConnector"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "OperationName",
+                "value": "BD_SEG_HTTP_ASYNC_SO.v1",
+                "type": "text"
+              },
+              {
+                "key": "From",
+                "value": "ANONYMOUS",
+                "type": "text"
+              },
+              {
+                "key": "To",
+                "value": "PSFT_HR",
+                "type": "text"
+              },
+              {
+                "key": "DataChunkCount",
+                "value": "2",
+                "type": "text"
+              },
+              {
+                "key": "DataChunk",
+                "value": "2",
+                "type": "text"
+              },
+              {
+                "key": "OperationType",
+                "value": "async",
+                "type": "text"
+              },
+              {
+                "key": "TransactionID",
+                "value": "63f317f8-2846-11f1-a1ef-9d40a8be08e1",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "multipart/related; type=\"application/xop+xml\"; boundary=\"your_boundary\"; start=\"ContentIDofSOAP_123\"; start-info=\"application/soap+xml\"",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"segments\": [\r\n    {\r\n      \"segmentId\": 3 ,\r\n      \"content\": \"This is the THIRD segment of the message.\"\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://oelser3.kovaion.com:8660/PSIGW/HttpListeningConnector",
+              "protocol": "http",
+              "host": [
+                "oelser3",
+                "kovaion",
+                "com"
+              ],
+              "port": "8660",
+              "path": [
+                "PSIGW",
+                "HttpListeningConnector"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 03 Apr 2026 05:47:51 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "214"
+            },
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=UTF-8"
+            },
+            {
+              "key": "X-ORACLE-DMS-ECID",
+              "value": "5136ad35-a3e8-47ae-a0bb-89b1c3541dee-0000060b"
+            },
+            {
+              "key": "X-ORACLE-DMS-RID",
+              "value": "0"
+            },
+            {
+              "key": "TransactionID",
+              "value": "63f317f8-2846-11f1-a1ef-9d40a8be08e1"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\"?>\n<IBResponse type = \"success\">\n    <DefaultTitle>Integration Broker Response</DefaultTitle>\n    <StatusCode>30</StatusCode>\n    <TransactionID>63f317f8-2846-11f1-a1ef-9d40a8be08e1</TransactionID>\n</IBResponse>"
+        },
+        {
+          "name": "Failure Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "OperationName",
+                "value": "BD_SEG_HTTP_ASYNC_SO.v1",
+                "type": "text"
+              },
+              {
+                "key": "From",
+                "value": "ANONYMOUS",
+                "type": "text"
+              },
+              {
+                "key": "To",
+                "value": "PSFT_HR",
+                "type": "text"
+              },
+              {
+                "key": "DataChunkCount",
+                "value": "2",
+                "type": "text"
+              },
+              {
+                "key": "DataChunk",
+                "value": "2",
+                "type": "text"
+              },
+              {
+                "key": "OperationType",
+                "value": "async",
+                "type": "text"
+              },
+              {
+                "key": "TransactionID",
+                "value": "63f317f8-2846-11f1-a1ef-9d40a8be08e1",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "multipart/related; type=\"application/xop+xml\"; boundary=\"your_boundary\"; start=\"ContentIDofSOAP_123\"; start-info=\"application/soap+xml\"",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"segments\": [\r\n    {\r\n      \"segmentId\": 3 ,\r\n      \"content\": \"This is the THIRD segment of the message.\"\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://oelser3.kovaion.com:8660/PSIGW/HttpListeningConnectordf",
+              "protocol": "http",
+              "host": [
+                "oelser3",
+                "kovaion",
+                "com"
+              ],
+              "port": "8660",
+              "path": [
+                "PSIGW",
+                "HttpListeningConnectordf"
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 03 Apr 2026 05:51:19 GMT"
+            },
+            {
+              "key": "Content-Length",
+              "value": "1164"
+            },
+            {
+              "key": "Content-Type",
+              "value": "text/html; charset=UTF-8"
+            },
+            {
+              "key": "X-ORACLE-DMS-ECID",
+              "value": "5136ad35-a3e8-47ae-a0bb-89b1c3541dee-0000060d"
+            },
+            {
+              "key": "X-ORACLE-DMS-RID",
+              "value": "0"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            }
+          ],
+          "cookie": [],
+          "body": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Draft//EN\">\n<HTML>\n    <HEAD>\n        <TITLE>Error 404--Not Found</TITLE>\n    </HEAD>\n    <BODY bgcolor=\"white\">\n        <FONT FACE=Helvetica>\n            <BR CLEAR=all>\n            <TABLE border=0 cellspacing=5>\n                <TR>\n                    <TD>\n                        <BR CLEAR=all>\n                        <FONT FACE=\"Helvetica\" COLOR=\"black\" SIZE=\"3\">\n                            <H2>Error 404--Not Found</H2>\n                        </FONT>\n                    </TD>\n                </TR>\n            </TABLE>\n            <TABLE border=0 width=100% cellpadding=10>\n                <TR>\n                    <TD VALIGN=top WIDTH=100% BGCOLOR=white>\n                        <FONT FACE=\"Courier New\">\n                            <FONT FACE=\"Helvetica\" SIZE=\"3\">\n                                <H3>From RFC 2068 \n                                    <i>Hypertext Transfer Protocol -- HTTP/1.1</i>:\n                                </H3>\n                            </FONT>\n                            <FONT FACE=\"Helvetica\" SIZE=\"3\">\n                                <H4>10.4.5 404 Not Found</H4>\n                            </FONT>\n                            <P>\n                                <FONT FACE=\"Courier New\">The server has not found anything matching the Request-URI. No indication is given of whether the condition is temporary or permanent.\n                                </p>\n                                <p>If the server does not wish to make this information available to the client, the status code 403 (Forbidden) can be used instead. The 410 (Gone) status code SHOULD be used if the server knows, through some internally configurable mechanism, that an old resource is permanently unavailable and has no forwarding address.\n                                </FONT>\n                            </P>\n                        </FONT>\n                    </TD>\n                </TR>\n            </TABLE>\n        </BODY>\n    </HTML>"
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BD_SEGMENTED_HTTP_SRV_PortBaseUrl",
+      "value": "http://172.16.0.93:8000"
+    }
+  ]
+}

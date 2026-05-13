@@ -1,0 +1,63 @@
+import PS_PT:Integration:INotificationHandler;
+
+class SegmentedMsgHandler extends PS_PT:Integration:INotificationHandler
+   method OnNotify(&message As Message);
+   method OnError(&request As Message);
+end-class;
+
+method OnNotify
+   /+ &message as Message +/
+   /+ Extends/implements PS_PT:Integration:INotificationHandler.OnNotify +/
+   Local Message &messageResp;
+   Local boolean &ret;
+   Local string &str1, &str_Final;
+   try
+      Local Record &rTempLog = CreateRecord(Record.BD_MSG_LOG_TMP);
+      &rTempLog.OPERATIONNAME.Value = "BD_SEG_HTTP_ASYNC_SO";
+      
+      &messageResp = CreateMessage(Operation.BD_SEG_HTTP_ASYNC_SO, %IntBroker_Response);
+      REM &ret = &messageResp.SetContentString("{""response"":""Simple Success""}");
+      &str_Final = "<?xml version=""1.0""?><response>";
+      Local integer &i;
+      For &i = 1 To &message.SegmentCount
+         &message.GetSegment(&i);
+         If &i = 1 Then
+            &str_Final = &str_Final | "<segment_details>";
+         End-If;
+         &str_Final = &str_Final | "<segment " | String(&i) | "><![[CDATA[" | &message.GetContentString(&i) | "]]</segment " | String(&i) | ">";
+      End-For;
+      &str_Final = &str_Final | "</segment_details>";
+      &str_Final = &str_Final | "</response>";
+      
+      &rTempLog.MSG_EVENT_DATALONG.Value = &str_Final;
+      &rTempLog.AUDIT_STAMP.Value = %Datetime;
+      &ret = &rTempLog.Insert();
+      
+      &ret = &messageResp.SetContentString(&str_Final);
+      %IntBroker.Publish(&messageResp); /* Not required but it could call another SO to process further*/
+   catch Exception &e
+      &messageResp = CreateMessage(Operation.BD_SEG_HTTP_ASYNC_SO, %IntBroker_Response);
+      &ret = &messageResp.SetContentString("<?xml version=""1.0""><ErrorResp><CatchDescr>" | &e.ToString() | "</CatchDescr></ErrorResp>");
+      %IntBroker.Publish(&messageResp);
+   end-try;
+end-method;
+
+method OnError
+   /+ &request as Message +/
+   /+ Extends/implements PS_PT:Integration:INotificationHandler.OnError +/
+   Local integer &nMsgNumber, &nMsgSetNumber;
+   Local string &sText;
+   Local Message &messageResp;
+   Local boolean &ret;
+   
+   &nMsgNumber = &request.IBException.MessageNumber;
+   &nMsgSetNumber = &request.IBException.MessageSetNumber;
+   rem    &sText = &exception.DefaultText;
+   &sText = &request.IBException.ToString();
+   
+   &messageResp = CreateMessage(Operation.BD_SEG_HTTP_ASYNC_SO, %IntBroker_Response);
+   &ret = &messageResp.SetContentString("<?xml version=""1.0""><ErrorResp><ErrorDescr>" | &sText | "</ErrorDescr></ErrorResp>");
+   
+   %IntBroker.Publish(&messageResp);
+end-method;
+
